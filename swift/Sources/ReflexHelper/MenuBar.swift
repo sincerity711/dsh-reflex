@@ -6,15 +6,23 @@ import ReflexKit
 /// Native Liquid Glass on Tahoe; keep the same readable material on older macOS releases.
 private struct ReflexGlassSurface: ViewModifier {
   @ViewBuilder func body(content: Content) -> some View {
+    #if compiler(>=6.2)
     if #available(macOS 26.0, *) {
       content.background {
         RoundedRectangle(cornerRadius: 16).fill(.clear)
           .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
       }
     } else {
-      content.background(.ultraThinMaterial)
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5))
+      fallback(content)
     }
+    #else
+    fallback(content)
+    #endif
+  }
+
+  private func fallback(_ content: Content) -> some View {
+    content.background(.ultraThinMaterial)
+      .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5))
   }
 }
 

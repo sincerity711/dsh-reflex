@@ -1,6 +1,6 @@
 {
   "name": "@sincerity711/dsh-reflex",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Turn macOS UI events into DSH actions: a native Accessibility helper, ReflexKit Swift programs, and a DSH plugin with rules.",
   "license": "MIT",
   "type": "module",
