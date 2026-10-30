@@ -41,6 +41,11 @@ jobs:
           mkdir -p artifacts
           npm pack --pack-destination artifacts
           node scripts/check-package.mjs artifacts/*.tgz
+          mkdir -p "$RUNNER_TEMP/packed-reflex"
+          tar -xzf artifacts/*.tgz -C "$RUNNER_TEMP/packed-reflex"
+          swift build --package-path "$RUNNER_TEMP/packed-reflex/package/programs/browser"
+          swift build --package-path "$RUNNER_TEMP/packed-reflex/package/programs/teams"
+          swift build --package-path "$RUNNER_TEMP/packed-reflex/package/swift" --product reflex-helper
       - uses: actions/upload-artifact@v4
         with:
           name: dsh-reflex-npm

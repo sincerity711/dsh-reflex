@@ -11,7 +11,7 @@ npm 包：`@sincerity711/dsh-reflex`（无 scope 的名称属于其他维护者�
 
 ## npm 首次配置
 
-GitHub 凭据无法代替 npm 账号授权。首次发布可以在仓库 `npm` environment 配置允许发布该 scope 的 `NPM_TOKEN`，再手动运行 Publish npm package（version: v0.1.1）。也可以由有权限的 npm 维护者下载 release tarball，执行 `npm publish <tarball> --access public`。
+GitHub 凭据无法代替 npm 账号授权。首次发布可以在仓库 `npm` environment 配置允许发布该 scope 的 `NPM_TOKEN`，再手动运行 Publish npm package（version: v0.1.2）。也可以由有权限的 npm 维护者下载 release tarball，执行 `npm publish <tarball> --access public`。
 
 包创建后，推荐在 npm 包设置的 Trusted Publisher 中配置：
 
@@ -28,8 +28,8 @@ GitHub 凭据无法代替 npm 账号授权。首次发布可以在仓库 `npm` e
 更新 package.json 和 package-lock.json 中的版本，提交后推送 main，再推送对应标签：
 
 ```sh
-git tag v0.1.2
-git push origin v0.1.2
+git tag v0.1.3
+git push origin v0.1.3
 ```
 
 npm 版本不可覆盖；重试前确认该版本是否已发布。构建失败不会产生 release。GitHub Release 可用 `.tgz` URL 直接作为 DSH 插件来源，即使 npm 尚未配置也能安装。

@@ -8,6 +8,8 @@ for (const path of [
   'lib/index.js', 'lib/index.d.ts', 'lib/client.js', 'lib/cli/dsh-reflex.js', 'lib/setup.js',
   'cordis.patch.yml', 'scripts/build-helper.sh', 'scripts/bundle-app.sh', 'scripts/setup-local-signing.sh',
   'swift/Package.swift', 'swift/Sources/ReflexVirtualDisplayBridge/LICENSE.txt',
+  'programs/teams/Sources/Teams/Program.swift', 'programs/browser/Sources/Browser/Program.swift',
+  'programs/teams/Tests/TeamsTests/TeamsTests.swift', 'programs/browser/Tests/BrowserTests/BrowserTests.swift',
   'programs/teams/Package.swift', 'programs/browser/Package.swift', 'examples/rules/teams-meeting-summary.yaml',
 ]) assert(entries.includes(`package/${path}`), `Missing ${path}`)
 assert(!entries.some(p => /\/(?:node_modules|\.build|\.codegraph)\//.test(p)), 'Private/build files in package')
