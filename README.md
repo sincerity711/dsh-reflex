@@ -74,7 +74,7 @@ cd programs/browser && swift test
 
 在 Desktop 的 **Plugins → dsh-reflex → 配置与执行记录** 中，选择 Teams 会议，可设置总结提示词、DSH 会话工作目录和同名会议回看时间（默认 5 分钟，0 表示关闭）。保存只影响该场景，不改写 `rules.yaml`。在执行记录中可查看字幕、采集缺口、发送给 DSH 的提示词、纪要和原始日志。设置存放在 `$DSH_HOME/reflex/state/teams-settings.json`，执行记录遵循插件的保留期限。
 
-setup 还可选择自动任务的模型和会议归档目录。保存的 provider/model 用于此后的自动总结，不受 DSH 全局默认模型切换影响；升级前未选择模型的配置仍使用默认模型。归档目录留空时关闭归档；启用后由插件代码保存会议入口、`ai-summary.md` 和 `transcript.md`，原始采集文件保存在归档目录的 `_reflex-captures/<runId>/` 中，不随 Reflex 运行记录过期删除。模型始终只读，只生成纪要和要合并的候选 runId；程序复制完整原文、按时间拼接并以 runId 去重。确认连续的会议更新同一归档，同名独立会议或已有 Teams recap 会使用独立文件名。模型或归档失败会显示在执行记录，模型失败前已复制的原始字幕仍保留。Obsidian 提示词范例见 `prompts/obsidian-meeting-summary.md`，日期以 Asia/Shanghai 计算。
+setup 还可选择自动任务的模型和会议归档目录。保存的 provider/model 用于此后的自动总结，不受 DSH 全局默认模型切换影响；升级前未选择模型的配置仍使用默认模型。归档目录留空时关闭归档；启用后由插件代码保存会议入口、`ai-summary.md` 和 `transcript.md`，原始采集文件保存在归档目录的 `_reflex-captures/<runId>/` 中，不随 Reflex 运行记录过期删除。模型始终只读，只生成纪要和要合并的候选 runId；程序复制完整原文、按时间拼接并以 runId 去重。确认连续的会议更新同一归档，同名独立会议或已有 Teams recap 会使用独立文件名。模型或归档失败会显示在执行记录，模型失败前已复制的原始字幕仍保留。可选的归档提示词范例见 `prompts/obsidian-meeting-summary.md`，日期使用运行机器的本地时区计算。
 
 Teams 程序启用后，检测到会议开始时启动字幕采集并发送本机通知；检测到离会时立即收尾，字幕可用时交给 DSH 总结。实际延迟取决于 Teams 窗口检测、采集收尾和模型响应。近期同名会议的记录只是提供给模型的参考，由模型判断是否合并；每次原始运行仍独立保存。Teams 字幕需要开启，识别可能有误。零等待意味着短暂的窗口检测丢失也可能被视为离会；如有需要，可通过插件的 `programs.teams.leaveGraceSec` 配置调整。
 

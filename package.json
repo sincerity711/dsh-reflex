@@ -1,6 +1,6 @@
 {
   "name": "@sincerity711/dsh-reflex",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Turn macOS UI events into DSH actions: a native Accessibility helper, ReflexKit Swift programs, and a DSH plugin with rules.",
   "license": "MIT",
   "type": "module",
@@ -26,7 +26,6 @@
     "swift/Package.swift",
     "swift/Sources",
     "programs/template",
-    "docs",
     "README.md",
     "LICENSE",
     "swift/Sources/ReflexVirtualDisplayBridge/LICENSE.txt",
@@ -38,7 +37,13 @@
     "programs/browser/Package.swift",
     "programs/browser/Sources",
     "programs/browser/Tests",
-    "programs/browser/Fixtures"
+    "programs/browser/Fixtures",
+    "docs/INSTALL.md",
+    "docs/RULES.md",
+    "docs/AUTHORING.md",
+    "docs/PROTOCOL.md",
+    "docs/ARCHITECTURE.md",
+    "docs/TEAMS.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && cp src/client.js lib/client.js",

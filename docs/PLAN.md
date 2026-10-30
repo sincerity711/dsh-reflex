@@ -36,10 +36,10 @@ Teams 消息场景只预留接口。
 | 系统 | macOS 27.0.1 arm64，Swift 6.4 + Xcode，Node 24.14.1，pnpm |
 | DSH Desktop | `/Applications/DeepSeek Harness.app`（`com.deepseek.dsh` **0.2.0-rc.2**），由 `dsh-desktop-host` 启动 profile `~/.dsh/profiles/desktop` |
 | DSH CLI | 全局 `@deepseek-ai/dsh` 0.2.0-rc.2 |
-| DSH 源码 | `~/SAPDevelop/deepseek-harness`，tag `dsh-v0.2.1-alpha.1`。web profile 软链到它的 `lib/`，但那份构建已过期 |
+| DSH 源码 | `~/projects/deepseek-harness`，tag `dsh-v0.2.1-alpha.1`。web profile 软链到它的 `lib/`，但那份构建已过期 |
 | Teams | 新版 `com.microsoft.teams2` 26246.1709.5146.8945。UI 在 Edge WebView2 153 子进程里，`--lang=en-cn` |
 | AX 权限 | 当前进程 `AXIsProcessTrusted() = false` |
-| 签名 | 本机已有自签名 codesigning 身份。`~/SAPDevelop/projector/scripts/{setup-local-signing,bundle-app}.sh` 可以照搬 |
+| 签名 | 本机已有自签名 codesigning 身份。`~/projects/projector/scripts/{setup-local-signing,bundle-app}.sh` 可以照搬 |
 
 **兼容基线定为 0.2.0-rc.2**，即 Desktop 实际运行的版本。
 

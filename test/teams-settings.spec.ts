@@ -13,6 +13,20 @@ async function setup() {
   return { root, settings: new TeamsSettingsStore(root, root, root) }
 }
 describe('Teams scenario settings', () => {
+  it('ships neutral defaults without a pinned model or archive path and preserves personal overrides', async () => {
+    const { root } = await setup()
+    const settings = new TeamsSettingsStore(root, process.cwd(), root)
+    const initial = await settings.read()
+    expect(initial.model).toBeNull()
+    expect(initial.archiveDirectory).toBe('')
+    expect(initial.workspace).toBe(root)
+    expect(initial.prompt).toContain('predominant language of the meeting')
+    expect(initial.prompt).not.toContain('Write meeting minutes in English')
+    const custom = { ...initial, prompt: 'My private custom instructions', model: { provider: 'local-provider', model: 'local-model' }, archiveDirectory: root }
+    await settings.save(custom)
+    expect(await new TeamsSettingsStore(root, process.cwd(), root).read()).toEqual(custom)
+  })
+
   it('validates, persists and rejects a stale concurrent edit without touching rules', async () => {
     const { root, settings } = await setup(); const rules = join(root, 'rules.yaml'); await writeFile(rules, 'custom rules')
     const initial = await settings.snapshot(); expect(initial.settings.lookbackMinutes).toBe(5)

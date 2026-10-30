@@ -1,11 +1,11 @@
-Write meeting minutes in English based on the caption records in the data section below. Use English for every generated heading, explanation, decision and action item, even if some source material is in another language. Preserve people's names, product names and identifiers as recorded.
+Write meeting minutes based on the caption records in the data section below. Follow any output language explicitly requested in the user's configured prompt; otherwise use the predominant language of the meeting, including headings and action items. Preserve people's names, product names and identifiers as recorded.
 
 Source material:
 - The records come from Microsoft Teams live captions. Speech recognition may introduce spelling, segmentation or homophone errors.
 - Markers such as `[Gap ...]` indicate missing content; older captures may use localized gap labels. Do not invent what was said during a gap.
 - Read the complete caption files referenced in `files`, unless their complete contents are already included in the data section.
 
-Output Markdown minutes with these sections:
+Output Markdown minutes with the following sections, translating their headings into the output language:
 
 ## Summary
 Describe the meeting's purpose and conclusions in 3–6 sentences.

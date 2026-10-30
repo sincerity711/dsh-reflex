@@ -120,7 +120,7 @@
 
 ## 2026-10-29：安装到本机运行版本
 
-用户授权替换后，确认运行中的 run 为 0、outbox 待确认事件为 0，再通过 `dsh-reflex helper install` 安装 helper 和内置程序。新 helper pid 92683，Teams pid 92766，DSH 已自动重连，Teams 状态 idle。**更正：当时状态报告中的 0.2.3 是安装 manifest 版本；后查 ready 日志，pid 92766 实际仍运行 0.2.2。先前据此判断更新成功不成立。** 安装文件与候选 helper 的 SHA-256 一致，原 desired.json 配置语义保持一致。辅助功能与 bundle 内/外子进程授权 selftest 均通过。未覆盖采集数据。旧版备份：`/Users/i060912/.dsh/reflex/backups/update-20261029-151041`。安装日志：`/tmp/reflex-install-20261029.log`。CUA 对菜单栏常驻进程读取超时，未完成实际弹出面板的视觉核对；新按钮的真实会议联调仍待执行。
+用户授权替换后，确认运行中的 run 为 0、outbox 待确认事件为 0，再通过 `dsh-reflex helper install` 安装 helper 和内置程序。新 helper pid 92683，Teams pid 92766，DSH 已自动重连，Teams 状态 idle。**更正：当时状态报告中的 0.2.3 是安装 manifest 版本；后查 ready 日志，pid 92766 实际仍运行 0.2.2。先前据此判断更新成功不成立。** 安装文件与候选 helper 的 SHA-256 一致，原 desired.json 配置语义保持一致。辅助功能与 bundle 内/外子进程授权 selftest 均通过。未覆盖采集数据。旧版备份：`$DSH_HOME/reflex/backups/update-20261029-151041`。安装日志：`/tmp/reflex-install-20261029.log`。CUA 对菜单栏常驻进程读取超时，未完成实际弹出面板的视觉核对；新按钮的真实会议联调仍待执行。
 
 ## 2026-10-29 16:10：修复按钮和字幕消失的安装回归
 

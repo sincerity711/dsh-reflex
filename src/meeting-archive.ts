@@ -127,10 +127,11 @@ export async function archiveTeamsMeeting(root: string, run: RunRecord, store: R
     members.set(run.runId, segment(run))
     const segments = [...members.values()].sort((a, b) => Date.parse(a.startedAt) - Date.parse(b.startedAt) || a.runId.localeCompare(b.runId))
     const title = safeTitle(String(run.event.payload['title'] ?? 'Teams meeting'))
-    const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(segments[0]!.startedAt))
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const date = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(segments[0]!.startedAt))
     let name = anchor?.name ?? `${date} - ${title}`
     if (!anchor && ((await lstat(join(base, name)).catch(() => undefined)) || (await lstat(join(base, `${name}.md`)).catch(() => undefined)))) {
-      const clock = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date(run.event.observedAt)).replaceAll(':', '')
+      const clock = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date(run.event.observedAt)).replaceAll(':', '')
       name += ` ${clock}-${run.runId}`
     }
     const folder = await directory(root, name)
@@ -150,7 +151,7 @@ export async function archiveTeamsMeeting(root: string, run: RunRecord, store: R
     await put(join(folder, 'reflex.json'), JSON.stringify(manifest, null, 2) + '\n')
     const refs = segments.map(s => `- [[_reflex-captures/${s.runId}/transcript|${s.runId}]] (${s.startedAt} – ${s.endedAt})`).join('\n')
     const summaryBlock = summary !== undefined || await readText(summaryPath) !== undefined ? `![[${name}/ai-summary.md]]` : 'Minutes have not been generated yet; the original captions have been saved.'
-    await put(note, `---\ntype: meeting\nsource: dsh-reflex\ndate: ${date}\ntitle: ${JSON.stringify(String(run.event.payload['title'] ?? title))}\nstart: ${segments[0]!.startedAt}\nend: ${segments.at(-1)!.endedAt}\n---\n\n# ${title}\n\nSource: Teams live captions (not Teams recap). Speech recognition errors and capture gaps may be present. Time zone: Asia/Shanghai.\n\n## AI Summary\n\n${summaryBlock}\n\n## Transcript\n\n![[${name}/transcript.md]]\n\n## Original Capture Segments\n\n${refs}\n`)
+    await put(note, `---\ntype: meeting\nsource: dsh-reflex\ndate: ${date}\ntitle: ${JSON.stringify(String(run.event.payload['title'] ?? title))}\nstart: ${segments[0]!.startedAt}\nend: ${segments.at(-1)!.endedAt}\n---\n\n# ${title}\n\nSource: Teams live captions (not Teams recap). Speech recognition errors and capture gaps may be present. Time zone: ${timeZone}.\n\n## AI Summary\n\n${summaryBlock}\n\n## Transcript\n\n![[${name}/transcript.md]]\n\n## Original Capture Segments\n\n${refs}\n`)
     await writeJsonAtomic(join(run.dir, 'archive.json'), { name, directory: base })
     return { note, transcript, summary: summaryPath, manifest: join(folder, 'reflex.json') }
   })

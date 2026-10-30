@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mkdtemp, mkdir, writeFile, readFile, rm, symlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
@@ -6,7 +6,7 @@ import { archiveTeamsMeeting, parseSummaryReply, preserveTeamsCapture } from '..
 import { RunStore, type RunRecord } from '../src/dispatch/runs-store.js'
 
 const roots: string[] = []
-afterEach(async () => { await Promise.all(roots.splice(0).map(path => rm(path, { recursive: true, force: true }))) })
+afterEach(async () => { vi.unstubAllEnvs(); await Promise.all(roots.splice(0).map(path => rm(path, { recursive: true, force: true }))) })
 async function setup() {
   const root = await mkdtemp(join(tmpdir(), 'reflex-archive-')); roots.push(root)
   const store = new RunStore(join(root, 'runs')); await store.load()
@@ -27,6 +27,16 @@ async function setup() {
 const firstId = '01AAAAAAAAAAAAAAAAAAAAAAAA', secondId = '01BBBBBBBBBBBBBBBBBBBBBBBB'
 
 describe('programmatic Teams archive', () => {
+  it('uses the runtime timezone instead of a developer-specific timezone', async () => {
+    vi.stubEnv('TZ', 'UTC')
+    const h = await setup()
+    const run = await h.capture(firstId, '2026-10-28T23:59:00Z', 'source')
+    await preserveTeamsCapture(h.vault, run)
+    const result = await archiveTeamsMeeting(h.vault, run, h.store, [], 'summary')
+    expect(result.note).toContain('2026-10-28')
+    expect(await readFile(result.note, 'utf8')).toContain('Time zone: UTC.')
+  })
+
   it('preserves complete source bytes, merges in time order and deduplicates retries by runId', async () => {
     const h = await setup()
     const original = '# 原文\n' + '很长的原始字幕🪴\n'.repeat(15000) + '[缺口 10:00–10:01]\n'
@@ -34,7 +44,7 @@ describe('programmatic Teams archive', () => {
     await preserveTeamsCapture(h.vault, first)
     const a = await archiveTeamsMeeting(h.vault, first, h.store, [], 'first summary')
     expect(await readFile(a.transcript, 'utf8')).toBe(original)
-    expect(a.note).toContain('2026-10-28') // Asia/Shanghai date, rather than host timezone
+    expect(a.note).toContain('2026-10-28') // date in the runtime local timezone
     const second = await h.capture(secondId, '2026-10-28T16:01:00Z', '# second\n后续字幕\n')
     await preserveTeamsCapture(h.vault, second)
     const b = await archiveTeamsMeeting(h.vault, second, h.store, [firstId], 'combined summary')

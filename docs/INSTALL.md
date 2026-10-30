@@ -13,7 +13,7 @@
 ## 1. 构建
 
 ```bash
-cd ~/SAPDevelop/dsh-reflex
+cd ~/projects/dsh-reflex
 npm install && npm run build
 ```
 
@@ -59,18 +59,18 @@ dsh-reflex selftest
 **Desktop**（profile `desktop`）：先完全退出 Desktop，然后执行
 
 ```bash
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add link:$HOME/SAPDevelop/dsh-reflex
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add link:$HOME/projects/dsh-reflex
 ```
 
 再打开 Desktop。
 
-**dsh web**：`dsh plugin add link:$HOME/SAPDevelop/dsh-reflex`。
+**dsh web**：`dsh plugin add link:$HOME/projects/dsh-reflex`。
 
 两者同时挂载时，只有一个是主实例，另一个在 `/reflex status` 里显示“被动”。
 
 插件 bundle 会插入两行：`dsh-reflex` 本身，以及 agent preset `reflex-summarizer`（只读文件 + 搜索，无 shell、无 web）。插件配置（可在 DSH 的插件设置里改）：`autoLaunchHelper`、`helperIdleExitSec`、`rulesFile`、`workspacePath`、`allowedFileRoots`、`stopGraceSec`、`defaultTaskTimeout`、`defaultRunTimeout`、`defaultDshTimeout`、`retentionDays`、`programs`（各程序的配置覆盖，如 `{ teams: { leaveGraceSec: 180 } }`）。
 
-Teams 场景的 setup 可保存自动总结模型、工作目录、提示词、回看分钟数和会议归档绝对目录。选定模型持久化为 `teams-settings.json` 的 `model: { provider, model }`；自动会话显式传递该选择，不修改 DSH 默认模型。`archiveDirectory` 留空关闭归档；Obsidian vault 可设为 `<vault>/02_Sources/Meetings`。原文复制和归档由插件执行，summarizer 继续保持只读；`transcript.md` 不经模型生成。`prompts/obsidian-meeting-summary.md` 是可使用的示例。
+Teams 场景的 setup 可保存自动总结模型、工作目录、提示词、回看分钟数和会议归档绝对目录。选定模型持久化为 `teams-settings.json` 的 `model: { provider, model }`；自动会话显式传递该选择，不修改 DSH 默认模型。`archiveDirectory` 留空关闭归档；Obsidian vault 可设为 `<vault>/02_Sources/Meetings`。原文复制和归档由插件执行，summarizer 继续保持只读；`transcript.md` 不经模型生成。`prompts/obsidian-meeting-summary.md` 是可选的通用归档示例，不要求特定知识库结构。
 
 ## 6. 规则
 

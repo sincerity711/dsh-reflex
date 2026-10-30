@@ -5,7 +5,7 @@
 ## 行为
 
 - Teams setup 从 DSH 已注册模型中选择 provider/model，保存独立配置；自动总结创建会话时使用保存的选择，不改变全局默认模型。旧配置未选择模型时兼容 DSH 默认。
-- 本机工作目录设为 /Users/i060912/SAPDevelop/obsidian-kg，归档目录设为其 02_Sources/Meetings。通用插件不硬编码个人路径。
+- 工作目录由用户选择；归档目录默认留空，需由用户显式配置。插件不包含个人路径或固定知识库布局。
 - 回看默认 5 分钟，模型判断同名片段是否连续。模型只输出纪要及被选中的候选 runId，不能生成或改写 transcript。
 - 程序在调用模型前保存完整采集原件；根据经校验的合并选择按时间连接完整 transcript，保留各片段及缺口。重试按 runId 去重。
 - 程序保存会议入口、ai-summary.md、transcript.md 和归档来源清单；确认合并后更新已有 Reflex 会议，已有 Teams recap 文件不覆盖，同名独立会议用时间和 runId 区分。
