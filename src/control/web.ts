@@ -1,3 +1,4 @@
+import { capture } from '../cli/exec.js'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { open, realpath } from 'node:fs/promises'
 import { join, relative, isAbsolute } from 'node:path'
@@ -10,7 +11,7 @@ const ERROR_CODES: Record<string, string> = {
   '设置已在其他页面更改，请刷新后重试': 'settingsConflict', '请输入不超过 50000 字符的总结提示词': 'invalidPrompt',
   '工作目录必须是绝对路径': 'absoluteWorkspace', '工作目录不存在或不是文件夹': 'missingWorkspace',
   '回看时间必须是 0–60 分钟': 'invalidLookback', unauthorized: 'unauthorized',
-  helperConnecting: 'helperConnecting',
+  helperConnecting: 'helperConnecting', settingsOpenFailed: 'settingsOpenFailed',
   '请选择有效的任务模型': 'invalidModel', '归档目录必须是绝对路径或留空': 'invalidArchiveDirectory',
 }
 const errorResponse = (message: string) => ({ error: message, code: ERROR_CODES[message] ?? 'unknownError' })
@@ -56,7 +57,8 @@ export function makeReflexHandler(core: ReflexCore, reject: (req: IncomingMessag
       const path = new URL(req.url ?? '/', 'http://localhost').pathname.slice(PREFIX.length)
       if (req.method === 'GET' && path === '/setup') {
         const helper = await active.supervisor.client?.request('helper.status', {}, 3000).catch(() => null)
-        send(200, { ...await active.setup.status(), helper: helper ?? null }); return
+        const helperInfo = helper && typeof helper === 'object' && !Array.isArray(helper) ? helper['helper'] ?? null : null
+        send(200, { ...await active.setup.status(), helper: helperInfo }); return
       }
       if (req.method === 'POST' && path.startsWith('/setup/')) {
         if (!String(req.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) { send(415, errorResponse('需要 JSON 请求')); return }
@@ -66,7 +68,11 @@ export function makeReflexHandler(core: ReflexCore, reject: (req: IncomingMessag
         if (path === '/setup/access') {
           const client = active.supervisor.client
           if (!client) { active.supervisor.reset(); send(409, errorResponse('helperConnecting')); return }
-          send(200, await client.request('helper.requestAccess', {})); return
+          const access = await client.request('helper.requestAccess', { openSettings: false })
+          // Explicit navigation must also work with already-authorized and older helpers.
+          const opened = await capture('/usr/bin/open', ['x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'], { timeoutMs: 10000 })
+          if (opened.code !== 0) throw new Error('settingsOpenFailed')
+          send(200, access); return
         }
       }
       if (req.method === 'POST' && path === '/locale') {

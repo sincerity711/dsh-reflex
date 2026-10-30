@@ -17,7 +17,7 @@ window.__ModuleLoader__.load({
       setupBuilding:'Building and installing the helper and built-in programs…', setupTools:'Complete the Command Line Tools installation, then retry. Swift 6 or later is required; if tools are already installed, update Xcode.',
       setupAccess:'Open Accessibility settings', setupPermission:'Turn on DSH Reflex Helper in Accessibility. This window will update when permission is active.',
       setupReady:'Helper ready. Configure the Teams scenario below, then enable Teams from /reflex program enable teams and confirm the requested access.',
-      setupLogs:'Installation details', helperConnecting:'Helper is connecting. Wait a moment, then retry.'
+      settingsOpenFailed:'Could not open System Settings. Try again or open Privacy & Security → Accessibility manually.', setupLogs:'Installation details', helperConnecting:'Helper is connecting. Wait a moment, then retry.'
     })
     Object.assign(dictionaries.zh, {
       setupTitle:'设置 Reflex', setupOpen:'安装与权限',
@@ -27,12 +27,12 @@ window.__ModuleLoader__.load({
       setupBuilding:'正在编译并安装助手和内置程序…', setupTools:'请完成系统弹出的开发工具安装，再点击重试。需要 Swift 6 或更高版本；若工具已安装，请更新 Xcode。',
       setupAccess:'打开辅助功能设置', setupPermission:'请在辅助功能中打开 DSH Reflex Helper。授权生效后，这里会自动更新。',
       setupReady:'助手已就绪。请在下方配置 Teams 场景，然后通过 /reflex program enable teams 按提示确认启用。',
-      setupLogs:'安装详情', helperConnecting:'助手正在连接，请稍候重试。'
+      settingsOpenFailed:'无法打开系统设置，请重试或手动打开“隐私与安全性 → 辅助功能”。', setupLogs:'安装详情', helperConnecting:'助手正在连接，请稍候重试。'
     })
     let openSetup = () => {}
     function installOnboarding() {
       if (typeof document === 'undefined') return () => {}
-      let stopped = false, timer, dialog, current, shown = false, inFlight = false
+      let stopped = false, timer, dialog, current, shown = false, inFlight = false, requestError = ''
       const text = key => (dictionaries[locale.getSnapshot().active.startsWith('zh') ? 'zh' : 'en'][key] || dictionaries.en[key] || key)
       const post = action => api('/setup/' + action, {method:'POST',headers:{'content-type':'application/json'},body:'{}'})
       const style = document.createElement('style')
@@ -52,14 +52,13 @@ window.__ModuleLoader__.load({
           const primary = document.createElement('button'); primary.dataset.part = 'primary'
           primary.addEventListener('click',async () => {
             if (inFlight) return
-            inFlight = true; primary.disabled = true; error.textContent = ''
+            inFlight = true; requestError = ''; primary.disabled = true; error.textContent = ''
             try {
-              if (current?.helper?.axTrusted && current?.phase !== 'failed') { await dismiss(); return }
               const action = current?.installed && !['failed','tools'].includes(current?.phase) ? 'access' : 'install'
               const result = await post(action)
               if (action === 'install') current = {...current,...result}
               await refresh()
-            } catch (e) { error.textContent = text(e.message) }
+            } catch (e) { requestError = e.message }
             finally { inFlight = false; if (dialog?.open) render() }
           })
           actions.append(later,primary); dialog.append(title,intro,message,error,details,actions); document.body.append(dialog)
@@ -68,17 +67,25 @@ window.__ModuleLoader__.load({
         shown = true; render(); if (!dialog.open) dialog.showModal()
       }
       const render = () => {
-        if (!dialog || !current) return
+        if (!dialog) return
+        if (!current) {
+          dialog.querySelector('[data-part="message"]').textContent = text('setupChecking')
+          dialog.querySelector('[data-part="error"]').textContent = requestError ? text(requestError) : ''
+          dialog.querySelector('[data-part="primary"]').disabled = true
+          dialog.querySelector('[data-part="primary"]').textContent = text('setupChecking')
+          dialog.querySelector('[data-part="later"]').textContent = text('setupLater')
+          return
+        }
         const busy = ['checking','signing','building'].includes(current.phase)
         const ready = current.helper?.axTrusted && current.phase !== 'failed'
         const key = ready ? 'setupReady' : ({checking:'setupChecking',signing:'setupSigning',building:'setupBuilding',tools:'setupTools'})[current.phase] || (current.installed ? 'setupPermission' : 'setupIdle')
         dialog.querySelector('[data-part="message"]').textContent = text(key)
         dialog.querySelector('[data-part="logs"]').textContent = current.log || ''
-        dialog.querySelector('[data-part="error"]').textContent = current.error || ''
+        dialog.querySelector('[data-part="error"]').textContent = current.error || (requestError ? text(requestError) : '')
         const primary = dialog.querySelector('[data-part="primary"]')
         primary.disabled = busy || inFlight
-        primary.textContent = text(ready ? 'setupClose' : busy ? ({checking:'setupChecking',signing:'setupChecking',building:'setupBuilding'})[current.phase] : current.phase === 'failed' || current.phase === 'tools' ? 'setupRetry' : current.installed ? 'setupAccess' : 'setupInstall')
-        dialog.querySelector('[data-part="later"]').textContent = text('setupLater')
+        primary.textContent = text(busy ? ({checking:'setupChecking',signing:'setupChecking',building:'setupBuilding'})[current.phase] : current.phase === 'failed' || current.phase === 'tools' ? 'setupRetry' : current.installed ? 'setupAccess' : 'setupInstall')
+        dialog.querySelector('[data-part="later"]').textContent = text(ready ? 'setupClose' : 'setupLater')
       }
       const refresh = async () => {
         try {
@@ -87,7 +94,7 @@ window.__ModuleLoader__.load({
           current = next
           if (!shown && !current.dismissed && current.platform === 'darwin' && (!current.installed || current.helper?.axTrusted === false)) show()
           render()
-        } catch (_) {}
+        } catch (e) { requestError ||= e.message; if (!stopped) render() }
       }
       const tick = async () => { await refresh(); if (!stopped) timer = setTimeout(tick, dialog?.open ? 2000 : 10000) }
       openSetup = () => { show(); void refresh() }

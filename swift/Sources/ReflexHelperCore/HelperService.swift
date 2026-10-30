@@ -393,7 +393,7 @@ public final class HelperService: @unchecked Sendable {
     case "helper.requestAccess":
       let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
       let trusted = AXIsProcessTrustedWithOptions(opts)
-      if !trusted, p["openSettings"]?.bool ?? true,
+      if p["openSettings"]?.bool ?? true,
          let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
       {
         DispatchQueue.main.async { NSWorkspace.shared.open(url) }
