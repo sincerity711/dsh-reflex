@@ -1,0 +1,10 @@
+# Browser tab focus → append to a local log via an external program (no model involved).
+version: 1
+rules:
+  - id: browser-focus-log
+    on: browser.tab.focused
+    dedupe: { key: "${event.payload.app}:${event.payload.title}", window: 30s }
+    steps:
+      - id: log
+        run: { argv: ["/usr/bin/true"] }
+        input: { title: "${event.payload.title}", app: "${event.payload.app}" }

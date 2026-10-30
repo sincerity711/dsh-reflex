@@ -1,0 +1,54 @@
+name: Publish npm package
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: false
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Existing built release tag, e.g. v0.1.0
+        required: true
+        type: string
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Enable after the initial npm publish and Trusted Publisher configuration.
+    if: github.event_name == 'workflow_dispatch' || vars.NPM_PUBLISH_ENABLED == 'true'
+    runs-on: macos-15
+    environment: npm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - name: Download tested release package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.version || github.event.release.tag_name }}
+        run: gh release download "$RELEASE_TAG" --pattern '*.tgz' --dir artifacts
+      - name: Verify version and publish
+        env:
+          RELEASE_TAG: ${{ inputs.version || github.event.release.tag_name }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          tar -xzf artifacts/*.tgz package/package.json
+          node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(fs.readFileSync("package/package.json")); if(p.name!=="@sincerity711/dsh-reflex" || `v${p.version}`!==process.env.RELEASE_TAG) throw new Error("Release package identity mismatch")'
+          npm publish artifacts/*.tgz --access public --provenance

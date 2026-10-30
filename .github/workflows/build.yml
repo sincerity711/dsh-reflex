@@ -1,0 +1,80 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Check tag version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: node --input-type=module -e 'import fs from "node:fs"; if (`v${JSON.parse(fs.readFileSync("package.json")).version}` !== process.env.GITHUB_REF_NAME) throw new Error("Tag and package version differ")'
+      - name: Test native packages
+        run: |
+          swift test --package-path swift
+          swift test --package-path programs/teams
+          swift test --package-path programs/browser
+      - name: Build helper for integration tests
+        run: ./scripts/build-helper.sh --no-install --debug
+      - run: npm run check
+      - name: Pack and validate DSH plugin
+        run: |
+          mkdir -p artifacts
+          npm pack --pack-destination artifacts
+          node scripts/check-package.mjs artifacts/*.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dsh-reflex-npm
+          path: artifacts/*.tgz
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dsh-reflex-npm
+          path: artifacts
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes
+          fi
+          gh release upload "$GITHUB_REF_NAME" artifacts/*.tgz --clobber
+
+  npm:
+    if: startsWith(github.ref, 'refs/tags/') && vars.NPM_PUBLISH_ENABLED == 'true'
+    needs: release
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ github.ref_name }}
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write

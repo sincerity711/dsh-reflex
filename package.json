@@ -1,0 +1,121 @@
+{
+  "name": "@sincerity711/dsh-reflex",
+  "version": "0.1.0",
+  "description": "Turn macOS UI events into DSH actions: a native Accessibility helper, ReflexKit Swift programs, and a DSH plugin with rules.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json",
+    "./client": "./lib/client.js"
+  },
+  "bin": {
+    "dsh-reflex": "lib/cli/dsh-reflex.js"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "prompts",
+    "examples",
+    "scripts",
+    "swift/Package.swift",
+    "swift/Sources",
+    "programs/*/Package.swift",
+    "programs/*/Sources",
+    "programs/template",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "swift/Sources/ReflexVirtualDisplayBridge/LICENSE.txt",
+    "swift/Tests",
+    "programs/*/Tests",
+    "programs/*/Fixtures"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/client.js lib/client.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "test:swift": "cd swift && swift test",
+    "prepare": "npm run build",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "os": [
+    "darwin"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@deepseek-ai/dsh-agent": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-agent-default-model": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-agent-preset-registry": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-api-session-controller": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-commands": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-llm": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-permission-presets": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-session": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-session-title": ">=0.2.0-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-workspace": ">=0.2.0-rc.2 <0.3.0"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.4",
+    "@deepseek-ai/schemastery": "3.18.4",
+    "@deepseek-ai/dsh-agent": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-agent-default-model": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-agent-preset-registry": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-api-session-controller": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-commands": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-permission-presets": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session-title": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-workspace": "0.2.0-rc.2",
+    "@types/node": "^22.20.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "accessibility",
+    "macos",
+    "teams",
+    "automation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sincerity711/dsh-reflex.git"
+  },
+  "homepage": "https://github.com/sincerity711/dsh-reflex#readme",
+  "bugs": {
+    "url": "https://github.com/sincerity711/dsh-reflex/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

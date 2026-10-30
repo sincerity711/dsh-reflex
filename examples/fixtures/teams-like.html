@@ -1,0 +1,76 @@
+<!doctype html>
+<!--
+  A page that mimics the Teams 2 meeting DOM used by the `teams` program:
+  #hangup-button, #call-duration-custom (ticking), and caption rows with class
+  fui-ChatMessageCompact__body containing [speaker, text]. A scripted conversation revises rows in
+  place, removes them, and re-renders one under a new node (new ChromeAXNodeId).
+  Used by programs/teams/Tests/TeamsTests/LiveHTMLTests.swift (opt-in, needs Accessibility).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Standup</title>
+<style>
+  body { font: 14px -apple-system, sans-serif; margin: 24px; }
+  .fui-ChatMessageCompact__body { padding: 4px 0; }
+  .fui-ChatMessageCompact__body span:first-child { font-weight: 600; margin-right: 8px; }
+</style>
+</head>
+<body>
+  <div id="meeting-stage" role="group" aria-label="Meeting">
+    <button id="hangup-button" aria-label="Leave">Leave</button>
+    <div id="call-duration-custom" role="timer" aria-label="Elapsed time"><span id="clock">00:00</span></div>
+    <button id="captions-panel-dismiss-button" aria-label="Close captions">×</button>
+    <div id="captions" role="list" aria-live="polite"></div>
+  </div>
+<script>
+  const list = document.getElementById('captions')
+  const clock = document.getElementById('clock')
+  const rows = new Map()
+  let seconds = 0
+  setInterval(() => {
+    seconds += 1
+    clock.textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
+  }, 1000)
+  function row(speaker, text) {
+    const div = document.createElement('div')
+    div.className = 'fui-ChatMessageCompact__body'
+    div.setAttribute('role', 'listitem')
+    const s = document.createElement('span'); s.textContent = speaker
+    const t = document.createElement('span'); t.textContent = text
+    div.append(s, t)
+    return div
+  }
+  const script = [
+    [1000, 'add', 1, 'Alice', 'Hello'],
+    [2000, 'set', 1, 'Hello everyone'],
+    [3000, 'set', 1, 'Hello everyone, let us start'],
+    [4000, 'add', 2, 'Bob', 'Sure'],
+    [5000, 'set', 2, 'Sure, I can begin'],
+    [6000, 'add', 3, 'Alice', 'Great'],
+    [7000, 'remove', 1],
+    [8000, 'rerender', 3],
+    [9000, 'add', 4, 'Bob', 'Next topic'],
+    [10000, 'remove', 2],
+    [11000, 'set', 4, 'Next topic is the release'],
+    [13000, 'remove', 3],
+    [15000, 'remove', 4],
+  ]
+  for (const [at, op, id, a, b] of script) {
+    setTimeout(() => {
+      if (op === 'add') { const r = row(a, b); rows.set(id, r); list.append(r) }
+      if (op === 'set') rows.get(id).lastChild.textContent = a
+      if (op === 'remove') { rows.get(id)?.remove(); rows.delete(id) }
+      if (op === 'rerender') {
+        const old = rows.get(id)
+        const r = row(old.firstChild.textContent, old.lastChild.textContent)
+        old.replaceWith(r); rows.set(id, r)
+      }
+    }, at)
+  }
+  window.expectedLines = [
+    ['Alice', 'Hello everyone, let us start'], ['Bob', 'Sure, I can begin'], ['Alice', 'Great'], ['Bob', 'Next topic is the release'],
+  ]
+</script>
+</body>
+</html>

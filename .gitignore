@@ -1,0 +1,12 @@
+node_modules/
+lib/
+swift/.build/
+programs/*/.build/
+*.log
+.DS_Store
+/tmp/
+
+.codegraph/
+*.tgz
+artifacts/
+.swiftpm/

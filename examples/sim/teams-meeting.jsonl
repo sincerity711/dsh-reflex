@@ -1,0 +1,2 @@
+{"eventType":"teams.meeting.started","resourceId":"meeting:standup","correlationId":"m-standup-1","payload":{"title":"Standup"}}
+{"eventType":"teams.meeting.ended","resourceId":"meeting:standup","correlationId":"m-standup-1","payload":{"title":"Standup","durationSec":900}}

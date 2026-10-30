@@ -1,0 +1,36 @@
+# Copy to $DSH_HOME/reflex/rules.yaml (or merge into it). Validate with: dsh-reflex rules validate <file>
+version: 1
+rules:
+  - id: teams-meeting-summary          # event → program task → by result → DSH
+    on: teams.meeting.started
+    concurrency: { key: "${event.correlationId}", onBusy: drop }
+    steps:
+      - id: capture
+        task: teams/captureCaptions    # runs inside the teams program
+        input:
+          title: "${event.payload.title}"
+          startedAt: "${event.observedAt}"
+          correlationId: "${event.correlationId}"
+        stopOn: teams.meeting.ended    # same correlationId → the task wraps up
+        resumable: true
+        timeout: 8h
+        next: { ok: summarize, partial: summarize, no_captions: end }
+      - id: summarize
+        dsh:
+          target: new                  # new | per-correlation | { session: <id> }
+          onBusy: queue                # queue (follow-up, never interrupts) | skip | new-session
+          agentPreset: reflex-summarizer
+          permissionPreset: read-only
+          title: "Meeting minutes · ${event.payload.title}"
+          promptFile: builtin:meeting-summary
+          files: ["${steps.capture.output.recordPath}"]
+          saveReplyTo: "${run.dir}/summary.md"
+        timeout: 30m
+
+  - id: captions-unavailable-notice    # event → local program, no model request
+    on: teams.captions.unavailable
+    dedupe: { key: "${event.correlationId}", window: 5s } # group simultaneous missing-panel/frozen-window signals
+    steps:
+      - id: notify
+        run: { builtin: notify }
+        input: { title: "dsh-reflex", message: "${event.payload.hint}" }
