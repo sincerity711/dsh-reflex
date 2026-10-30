@@ -19,6 +19,7 @@ trap 'rm -rf "$APP_PATH"' EXIT
 mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources"
 cp "$HELPER_EXE" "$APP_PATH/Contents/MacOS/reflex-helper"
 cp "$AXCHECK_EXE" "$APP_PATH/Contents/MacOS/reflex-axcheck"
+cp "${0:A:h}/../assets/Reflex.icns" "$APP_PATH/Contents/Resources/Reflex.icns"
 mkdir -p "$APP_PATH/Contents/Resources/ThirdParty"
 cp "${0:A:h}/../swift/Sources/ReflexVirtualDisplayBridge/LICENSE.txt" "$APP_PATH/Contents/Resources/ThirdParty/DisplayLoom-LICENSE.txt"
 cat > "$APP_PATH/Contents/Info.plist" <<PLIST
@@ -31,6 +32,7 @@ cat > "$APP_PATH/Contents/Info.plist" <<PLIST
 <key>CFBundleDevelopmentRegion</key><string>en</string>
 <key>CFBundleExecutable</key><string>reflex-helper</string>
 <key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleIconFile</key><string>Reflex.icns</string>
 <key>CFBundleVersion</key><string>$BUILD_NUMBER</string>
 <key>CFBundleShortVersionString</key><string>$VERSION</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>

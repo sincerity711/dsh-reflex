@@ -6,7 +6,7 @@ assert(archive, 'Pass the npm tarball path')
 const entries = execFileSync('tar', ['-tzf', archive], { encoding: 'utf8' }).trim().split('\n')
 for (const path of [
   'lib/index.js', 'lib/index.d.ts', 'lib/client.js', 'lib/cli/dsh-reflex.js', 'lib/setup.js',
-  'cordis.patch.yml', 'scripts/build-helper.sh', 'scripts/bundle-app.sh', 'scripts/setup-local-signing.sh',
+  'assets/Reflex.icns', 'cordis.patch.yml', 'scripts/build-helper.sh', 'scripts/bundle-app.sh', 'scripts/setup-local-signing.sh',
   'swift/Package.swift', 'swift/Sources/ReflexVirtualDisplayBridge/LICENSE.txt',
   'programs/teams/Sources/Teams/Program.swift', 'programs/browser/Sources/Browser/Program.swift',
   'programs/teams/Tests/TeamsTests/TeamsTests.swift', 'programs/browser/Tests/BrowserTests/BrowserTests.swift',
